@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script
+      defer
+      src="https://unpkg.com/@livefir/fir@latest/dist/fir.min.js"
+    ></script>
+    <script
+      defer
+      src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"
+    ></script>
+    <title>TODO - App</title>
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css"
+    />
+  </head>
+  <body>
+    <div x-data>
+      <div>TODO List</div>
+      <div class="columns">
+        <form
+          method="post"
+          @submit.prevent="$fir.submit()"
+          x-ref="addTodo"
+          action="/?event=add-todo"
+          @fir:add-todo:ok::todo="$refs.addTodo.reset()"
+        >
+          <div class="column">
+            <input
+              placeholder="Todo item"
+              class="input is-info"
+              name="todo"
+              type="text"
+            />
+          </div>
+          <div class="column">
+            <button class="button" type="submit">Add Item</button>
+          </div>
+        </form>
+      </div>
+      <div>
+        <div class="columns center">
+          <div class="column"><b>Title</b></div>
+          <div class="column"><b>Status</b></div>
+          <div class="column"><b>Actions</b></div>
+        </div>
+        <div @fir:add-todo:ok::todo="$fir.appendEl()">
+          {{ range .todos }} {{ block "todo" . }}
+          <div
+            fir-key="{{ .Id }}"
+            class="columns {{ .Status }}"
+            @fir:delete-todo:ok="$fir.removeEl()"
+          >
+            <div class="column">{{ .Text }}</div>
+            <div
+              class="column"
+              @fir:mark-complete:ok::mark-complete="$fir.replace()"
+            >
+              {{ block "mark-complete" . }}
+              <div>{{ .Status }}</div>
+              {{ end }}
+            </div>
+            <form
+              method="post"
+              @submit.prevent="$fir.submit()"
+              class="columns column"
+            >
+              <input type="hidden" name="todoID" value="{{ .Id }}" />
+              <button
+                class="column button is-danger"
+                formaction="/?event=delete-todo"
+              >
+                Delete
+              </button>
+              <button
+                class="column button is-primary"
+                formaction="/?event=mark-complete"
+              >
+                Complete
+              </button>
+            </form>
+          </div>
+          {{ end }} {{end}}
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
